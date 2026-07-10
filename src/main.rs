@@ -55,14 +55,17 @@ impl Ball {
     fn check_hit_the_wall(&mut self) -> bool{
         let mut game_over:bool = false; 
         if self.x - self.r < 0. {
+            self.x = self.r + 1.; 
             self.vx = -self.vx;
         }
 
         if self.x + self.r > screen_width() {
+            self.x = screen_width() - self.r - 1.; 
             self.vx = -self.vx;
         }
 
         if self.y - self.r < 0. {
+            self.y = self.r + 1.; 
             self.vy = -self.vy;
         }
 
@@ -102,43 +105,134 @@ impl Block {
         let wtf : Mesh = Mesh { vertices: vertices, indices : indices, texture : self.tex.clone()}; 
         draw_mesh(&wtf); 
     }
+
+    fn move_block(&mut self) {
+        if is_key_down(KeyCode::Left) {
+            self.x -= self.vx * get_frame_time(); 
+            if self.x < 0. {
+                self.x = 0.; 
+            }
+        } 
+        if is_key_down(KeyCode::Right) {
+            self.x += self.vx * get_frame_time(); 
+            if self.x + self.w > screen_width() {
+                self.x = screen_width() - self.w; 
+            }
+        }   
+    }
 }
 
-fn collision(ball:&mut Ball, block:&mut Block, score:&mut i32) {
-    let cx = ball.x.clamp(block.x, block.x + block.w) - ball.x; 
-    let cy = ball.y.clamp(block.y, block.y + block.h) - ball.y;
-    let dis =  cx*cx + cy*cy - ball.r * ball.r; 
-    println!("distance {} {:?} {:?}",dis,cx, cy); 
-    if cx*cx + cy*cy - ball.r * ball.r < 0. {
-        // 어떤 면에서 만나는지를 체크해야되는뎅. 
-        // 위또는 아래 
-        println!("kuromi hit!!!"); 
-        *score += 1; 
-        let up_hit:bool = ball.x >= block.x && ball.x <= block.x + block.w; 
-        let lr_hit:bool = ball.y >= block.y && ball.y <= block.y + block.h; 
-        if up_hit {
-            ball.vy = -ball.vy * rand::gen_range(0.9, 1.1); 
-        } 
-        if lr_hit {
-            ball.vx = -ball.vx * rand::gen_range(0.9, 1.1); 
+enum dir {
+    LR, 
+    UD, 
+    None, 
+}
+
+struct collision_state{
+    hit_dir:dir, 
+    hit_time:f32, 
+}
+
+impl collision_state { 
+    
+}
+
+fn check_block_collision_time(& ball:Ball, & block:Block, time_limit:f32) -> collision_state{
+    // ball.x -> ball.x + ball.vx * fps (get_frame_time()) 
+    // 만날때까지 시간 게산하기 
+    // [block.x-ball.r, block.x+block.w+ball.r] x [block.y-ball.r, block.y+block.h+ball.r] 에 도달? -> 아 time interval idea!!!! 
+    let mut tx = (block.x - ball.r - ball.x) / ball.vx; 
+    let mut txx = (block.x+block.w+ball.r - ball.x) / ball.vx; 
+    let mut ty = (block.y - ball.r - ball.x) / ball.vy; 
+    let mut tyy = (block.y+block.h+ball.r - ball.y) / ball.vy; 
+    if tx>txx {
+        let mut tmp = tx; 
+        tx = txx; 
+        txx = tmp; 
+    } 
+
+    if ty>tyy {
+        let mut tmp = ty; 
+        ty = tyy; 
+        tyy = tmp; 
+    }
+    // tx = tx.max(0.); txx = txx.max(0.); ty = ty.max(0.); tyy = tyy.max(0.); 
+    if txx < 0.0 || tyy < 0.0 || tx > tyy || ty > txx{
+        return collision_state::None; 
+    }
+    let col_t = tx.max(ty); 
+    if col_t > time_limit {
+        return collision_state::None; 
+    }
+    let dir_ : dir = dir::None; 
+    if tx > ty {
+        dir_ = dif::LR; 
+    } else {
+        dir_ = dif::UD; 
+    }
+    return collision_state{hit_dir:dir_, hit_time:col_t}; 
+}
+
+fn check_wall_collision_time(& ball: Ball, time_limit:f32) -> collision_state { 
+    let mut tx = 0.; 
+    let mut ty = 0.; 
+    if ball.vx > 0. {
+        tx = (screen_width() - ball.x - ball.r) / ball.vx; 
+    } else {
+        tx = (ball.x - ball.r) / ball.vx.abs(); 
+    } 
+
+    if ball.vy > 0. {
+        ty = (screen_height() - ball.y - ball.r) / ball.vy; 
+    } else {
+        ty = (ball.y - ball.r) / ball.vy.abs(); 
+    }
+
+    if tx.min(ty) < time_limit {
+        return collision_state::None; 
+    } 
+    let dif_ : dif = dif::None; 
+    if tx > ty {
+        dir_ = dif::UD; 
+    } else {
+        dir_ = dif::LR; 
+    }
+    return collision_state{hit_dir:dir_, hit_time:tx.min(ty)}; 
+}
+
+
+fn init_vec(cat: &Texture2D, map_blocks: &mut Vec<Block>) {
+    map_blocks.clear(); 
+    let row_blocks = 5; 
+    let col_blocks = 9; 
+    for i in 0..row_blocks {
+        for j in 0..col_blocks { 
+            let x = screen_width() * (2.*i as f32 + 1.) / 11.; 
+            let w = screen_width() / 11.; 
+            let y = screen_height() * (2.*j as f32 + 1.) / 32.; 
+            let h = screen_height() / 32.; 
+            let tex = Some(cat.clone()); 
+            let mut bb : Block = Block{x,w,y,h,tex,hp:1,vx:0.}; 
+            map_blocks.push(bb); 
         }
-        block.hp -= 1 
     }
 }
 
 #[macroquad::main(window_conf)]
 async fn main() {
-    let mut dx : f32 = rand::gen_range(-6., 6.); 
-    let mut dy : f32 = rand::gen_range(-6., 6.); 
     let rustacean_tex = load_texture("./kuromi.png").await.unwrap(); 
     let mut kuromi_ball : Ball = Ball::new(Some(rustacean_tex.clone())); 
-    let mut stick : Block = Block{x:screen_width() / 2. - 30.0, y: screen_height() * 0.9, w:200.0, h:80.0, tex: Some(load_texture("./rustacean_happy.png").await.unwrap()), hp:10000, vx:100.}; 
+    let mut stick : Block = Block{x:screen_width() / 2. - 30.0, y: screen_height() * 0.9, w:200.0, h:80.0, tex: Some(load_texture("./rustacean_happy.png").await.unwrap()), hp:10000, vx:screen_width() / 2.}; 
 
+    let mut map_blocks : Vec<Block> = Vec::new(); 
+    let tex_cat = load_texture("./cat.png").await.unwrap(); 
+    init_vec(&tex_cat, &mut map_blocks); 
     // draw texture 
     let mut game_over : bool = false; 
     let mut score = 0; 
     loop {
-        if !game_over {
+        println!("fps : {}",get_fps());
+        if !game_over {     
             clear_background(GRAY);
             let score_text = format!("score : {}",score); 
             let font_size = 20.; 
@@ -150,21 +244,62 @@ async fn main() {
                 font_size,
                 DARKGRAY,
             );
-
-
-            game_over = kuromi_ball.check_hit_the_wall(); 
-
-            if is_key_down(KeyCode::Left) && stick.x > 0. {
-                stick.x -= 4.0; 
-            } 
-
-            if is_key_down(KeyCode::Right) && stick.x + stick.w < screen_width() {
-                stick.x += 4.0; 
-            }   
-
-            collision(&mut kuromi_ball,&mut stick,&mut score); 
             
+            /* 
+            각 블록, 스틱, 벽에 대해서 체크 후 시간 제일 짧은거 -> 실행 반복 
+            */
+            let mut time_limit = get_frame_time(); 
+            loop {
+                let mut idx = -1; // 0~size-1 -> map_blocks size -> stick size+1 -> wall 
+                let mut state = 1271894789142.; 
+                for i in 0.. map_blocks.size() {
+                    let cur_state = check_block_collision_time(& kuromi_ball, & map_blocks[i]); 
+                    if let Hit(t) = cur_state {
+                        if t < state {
+                            idx = i; 
+                            state = t; 
+                        }
+                    }
+                }
+                {
+                    let cur_state = check_block_collision_time(& kuromi_ball, & stick); 
+                    if let Hit(t) = cur_state {
+                        if t < state {
+                            idx = map_blocks.size() as i32; 
+                            state = t; 
+                        }
+                    }
+                } 
+                {
+                    let cur_state = check_wall_collision_time(& kuromi_ball); 
+                    if let Hit(t) = cur_state {
+                        if t < state {
+                            idx = map_blocks.size() as i32; 
+                            state = t; 
+                        }
+                    }
+                }
+                if idx == -1 {
+                    break; 
+                }
+
+            }
+
+
+            let mut tmp = 1; 
             kuromi_ball.move_ball(); 
+            stick.move_block(); 
+            collision(&mut kuromi_ball,&mut stick,&mut tmp); 
+            if let Some(index) = map_blocks.iter_mut().position(|bb| collision(&mut kuromi_ball, bb, &mut score)) {
+                map_blocks.remove(index); 
+            }
+            map_blocks.iter().for_each(|x| x.draw()); 
+            game_over = kuromi_ball.check_hit_the_wall(); 
+            
+            // first interact 
+
+
+            // draw 
             kuromi_ball.draw(); 
             stick.draw(); 
         } 
@@ -185,11 +320,12 @@ async fn main() {
             if is_key_down(KeyCode::Enter) {
                 score = 0; 
                 kuromi_ball = Ball::new(Some(rustacean_tex.clone())); 
-                stick = Block{x:screen_width() / 2. - 30.0, y: screen_height() * 0.9, w:200.0, h:80.0, tex: Some(load_texture("./rustacean_happy.png").await.unwrap()), hp:10000, vx:100.}; 
+                stick = Block{x:screen_width() / 2. - 30.0, y: screen_height() * 0.9, w:200.0, h:80.0, tex: Some(load_texture("./rustacean_happy.png").await.unwrap()), hp:10000, vx:screen_width() / 2.}; 
                 game_over = false; 
+                init_vec(&tex_cat, &mut map_blocks); 
             }  
-        }
 
+        }
         next_frame().await
     }
 }
