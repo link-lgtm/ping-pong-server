@@ -6,7 +6,7 @@ mod collision;
 
 use ball::Ball; 
 use block::Block; 
-use collision::{CollisionState, get_block_collision_time, get_wall_collision_time}; 
+use collision::{CollisionState, get_block_collision_time, get_wall_collision_time, Dir}; 
 
 fn window_conf() -> Conf {
     Conf {
@@ -44,7 +44,7 @@ fn swappy(idx: &mut i32, i: usize, col_state : CollisionState, state : &mut Coll
 async fn main() {
     let rustacean_tex = load_texture("./kuromi.png").await.unwrap(); 
     let mut kuromi_ball : Ball = Ball::new(Some(rustacean_tex.clone())); 
-    let mut stick : Block = Block{x:screen_width() / 2. - 30.0, y: screen_height() * 0.9, w:200.0, h:80.0, tex: Some(load_texture("./rustacean_happy.png").await.unwrap()), hp:10000, vx:screen_width() / 2.}; 
+    let mut stick : Block = Block{x:screen_width() / 2. - 30.0, y: screen_height() * 0.9, w:200.0, h:80.0, tex: Some(load_texture("./perris.png").await.unwrap()), hp:10000, vx:screen_width() / 2.}; 
 
     let mut map_blocks : Vec<Block> = Vec::new(); 
     let tex_cat = load_texture("./cat.png").await.unwrap(); 
@@ -52,13 +52,6 @@ async fn main() {
     let mut game_over : bool = false; 
     let mut score = 0; 
     loop {
-        //println!("fps : {}",get_fps());
-        if !game_over {
-            if kuromi_ball.vy > 0. && kuromi_ball.y + kuromi_ball.r + kuromi_ball.vy * get_frame_time() > screen_height() {
-                println!("{:?}",kuromi_ball); 
-                game_over = true; 
-            }
-        }
         if !game_over {     
             clear_background(GRAY);
             let score_text = format!("score : {}",score); 
@@ -74,7 +67,7 @@ async fn main() {
             /* 
             각 블록, 스틱, 벽에 대해서 체크 후 시간 제일 짧은거 -> 실행 반복 
             */
-            let mut time_limit = get_frame_time(); 
+            let mut time_limit = 0.007; 
 
             loop {
                 let mut idx = -1 as i32; // 0~size-1 -> map_blocks size -> stick size+1 -> wall 
@@ -93,8 +86,12 @@ async fn main() {
                     map_blocks.remove(idx as usize); 
                     score += 1; 
                 }
+                if idx == ll+1 && state.hit_dir == Dir::UD && kuromi_ball.vy > 0. {
+                    game_over = true; break; 
+                }
                 kuromi_ball.process_collision_state(&state); 
                 time_limit -= state.hit_time.unwrap(); 
+                
             }
             kuromi_ball.move_ball(time_limit);
             stick.move_block(); 
@@ -120,7 +117,7 @@ async fn main() {
             if is_key_down(KeyCode::Enter) {
                 score = 0; 
                 kuromi_ball = Ball::new(Some(rustacean_tex.clone())); 
-                stick = Block{x:screen_width() / 2. - 30.0, y: screen_height() * 0.9, w:200.0, h:80.0, tex: Some(load_texture("./rustacean_happy.png").await.unwrap()), hp:10000, vx:screen_width() / 2.}; 
+                stick = Block{x:screen_width() / 2. - 30.0, y: screen_height() * 0.9, w:200.0, h:80.0, tex: Some(load_texture("./perris.png").await.unwrap()), hp:10000, vx:screen_width() / 2.}; 
                 game_over = false; 
                 init_vec(&tex_cat, &mut map_blocks); 
             }  
