@@ -1,0 +1,36 @@
+use super::collision::{CollisionState,Dir}; 
+
+#[derive(Debug,Default)]
+pub struct Ball {
+    pub x: f32, 
+    pub y: f32, 
+    pub r: f32,
+    pub vx: f32, 
+    pub vy: f32, 
+}
+
+impl Ball {
+    pub fn new() -> Ball {
+        Ball::default() 
+    }
+
+    pub fn advance(&mut self, dt:f32) {
+        self.x += self.vx * dt; 
+        self.y += self.vy * dt; 
+    }
+
+    pub fn process_collision_state(&mut self, collision_state : &CollisionState) { 
+        self.advance(collision_state.hit_time.unwrap()); 
+        match collision_state.hit_dir {
+            Dir::LR => {
+                self.vx = - self.vx 
+            },  
+            Dir::UD => {
+                self.vy = - self.vy; 
+            }, 
+        }
+        self.advance(0.0000001);  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    }
+
+}
+

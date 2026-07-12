@@ -15,30 +15,11 @@ fn window_conf() -> Conf {
     }
 }
 
-fn init_vec(cat: &Texture2D, map_blocks: &mut Vec<Block>) {
-    map_blocks.clear(); 
-    let row_blocks = 5; 
-    let col_blocks = 9; 
-    for i in 0..row_blocks {
-        for j in 0..col_blocks { 
-            let x = screen_width() * (2.*i as f32 + 1.) / 11.; 
-            let w = screen_width() / 11.; 
-            let y = screen_height() * (2.*j as f32 + 1.) / 32.; 
-            let h = screen_height() / 32.; 
-            let tex = Some(cat.clone()); 
-            let bb : Block = Block{x,w,y,h,tex,hp:1,vx:0.}; 
-            map_blocks.push(bb); 
-        }
-    }
-}
-
 fn swappy(idx: &mut i32, i: usize, col_state : CollisionState, state : &mut CollisionState) {
     if *state > col_state {
         *state = col_state; *idx = i as i32; 
     }
 }
-
-
 
 #[macroquad::main(window_conf)]
 async fn main() {
@@ -126,3 +107,63 @@ async fn main() {
         next_frame().await
     }
 }
+
+
+
+impl Block {
+    pub fn move_block(&mut self) {
+        if is_key_down(KeyCode::Left) {
+            self.x -= self.vx * get_frame_time(); 
+            if self.x < 0. {
+                self.x = 0.; 
+            }
+        } 
+        if is_key_down(KeyCode::Right) {
+            self.x += self.vx * get_frame_time(); 
+            if self.x + self.w > screen_width() {
+                self.x = screen_width() - self.w; 
+            }
+        }   
+    }
+}
+
+impl Ball {
+    pub fn new() -> Ball {
+        Ball::default() 
+    }
+
+    pub fn move_ball(&mut self, fps : f32) {
+        self.x += self.vx * fps; 
+        self.y += self.vy * fps; 
+    }
+
+    pub fn process_collision_state(&mut self, collision_state : &CollisionState) { 
+        self.move_ball(collision_state.hit_time.unwrap()); 
+        match collision_state.hit_dir {
+            Dir::LR => {
+                self.vx = - self.vx 
+            },  
+            Dir::UD => {
+                self.vy = - self.vy; 
+            }, 
+        }
+        self.move_ball(0.0000001);  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    }
+}
+
+
+pub fn move_block(&mut self) {
+    if is_key_down(KeyCode::Left) {
+        self.x -= self.vx * get_frame_time(); 
+        if self.x < 0. {
+            self.x = 0.; 
+        }
+    } 
+    if is_key_down(KeyCode::Right) {
+        self.x += self.vx * get_frame_time(); 
+        if self.x + self.w > screen_width() {
+            self.x = screen_width() - self.w; 
+        }
+    }   
+}
+
