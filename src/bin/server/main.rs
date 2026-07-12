@@ -108,8 +108,6 @@ async fn main() {
     }
 }
 
-
-
 impl Block {
     pub fn move_block(&mut self) {
         if is_key_down(KeyCode::Left) {
