@@ -1,6 +1,9 @@
+use macroquad::prelude::*; 
+use break_the_wall::game::*; 
 mod render;
 
-fn main() {
+#[macroquad::main("sososossosososos")]
+async fn main() {
     
 }
 

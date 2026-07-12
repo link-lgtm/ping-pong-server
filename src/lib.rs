@@ -1,2 +1,2 @@
-mod game; 
-mod protocol;
+pub mod game; 
+pub mod protocol;

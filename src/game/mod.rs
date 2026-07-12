@@ -37,7 +37,10 @@ pub fn update(game_state : &mut GameState, p1_game_input: &GameInput, p2_game_in
 
         let ll = map_blocks.len() as i32 ; 
         if idx < ll {
-            map_blocks.remove(idx as usize); 
+            map_blocks[idx as usize].hp -= 1; 
+            if map_blocks[idx as usize].hp == 0 {
+                map_blocks.remove(idx as usize); 
+            }
         }
         if idx == ll+2 && state.hit_dir == Dir::LR {
             game_state.is_game_over = true; break; 

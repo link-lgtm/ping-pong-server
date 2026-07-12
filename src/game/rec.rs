@@ -12,7 +12,7 @@ pub struct Obstacle {
     pub rec: Rec, 
     pub vx : f32, 
     pub vy : f32,
-    pub hp : f32, 
+    pub hp : i32, 
 }
 pub struct Player {
     pub rec: Rec, 
