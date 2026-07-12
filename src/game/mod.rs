@@ -22,6 +22,7 @@ pub fn update(game_state : &mut GameState, p1_game_input: &GameInput, p2_game_in
     let player2 = &mut game_state.player2; 
 
     loop {
+        // println!("wtf??? kuromi?????"); 
         let mut idx = -1 as i32; // 0~size-1 -> map_blocks size -> stick size+1 -> wall 
         let mut state = CollisionState::trash(); 
         for i in 0.. map_blocks.len() {
@@ -45,9 +46,11 @@ pub fn update(game_state : &mut GameState, p1_game_input: &GameInput, p2_game_in
         if idx == ll+2 && state.hit_dir == Dir::LR {
             game_state.is_game_over = true; break; 
         }
+        println!("{:?} {:?} {:?}", state, ball, idx); 
         ball.process_collision_state(&state); 
-        time_limit -= state.hit_time.unwrap(); 
+        time_limit -= state.hit_time.unwrap() ; 
     }
+    println!("wtf?? time {:?}",time_limit); 
     ball.advance(time_limit);
     
     player1.advance(dt, &p1_game_input.button);

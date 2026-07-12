@@ -1,18 +1,50 @@
-/* 
-fn init_vec(cat: &Texture2D, map_blocks: &mut Vec<Block>) {
-    map_blocks.clear(); 
-    let row_blocks = 5; 
-    let col_blocks = 9; 
-    for i in 0..row_blocks {
-        for j in 0..col_blocks { 
-            let x = screen_width() * (2.*i as f32 + 1.) / 11.; 
-            let w = screen_width() / 11.; 
-            let y = screen_height() * (2.*j as f32 + 1.) / 32.; 
-            let h = screen_height() / 32.; 
-            let tex = Some(cat.clone()); 
-            let bb : Block = Block{x,w,y,h,tex,hp:1,vx:0.}; 
-            map_blocks.push(bb); 
-        }
-    }
+use super::ball::Ball; 
+use super::config::*; 
+use super::rec::{Obstacle,Player, Rec}; 
+use crate::protocol::{GameState}; 
+
+pub fn game_create() -> GameState {
+    let tick = 0; 
+    let player1 = Player {
+        rec : Rec {
+            x : 100., 
+            y : 285., 
+            w : 50., 
+            h : 150.,
+        }, 
+        vx : 1000., 
+        vy : 900., 
+        score : 0, 
+    }; 
+    let player2 = Player { 
+        rec : Rec {
+            x : 1130., 
+            y : 285., 
+            w : 50., 
+            h : 150.,
+        }, 
+        vx : 1000., 
+        vy : 900., 
+        score : 0, 
+    }; 
+    let ball = Ball {
+        x : 640., 
+        y : 360.,
+        r : 40., 
+        vx : 400., 
+        vy : 400. 
+    }; 
+    let mut obstacles : Vec::<Obstacle> = Vec::new(); 
+    obstacles.push(Obstacle{
+        rec: Rec {
+            x: 500., 
+            y: 120., 
+            w: 60., 
+            h: 120., 
+        }, 
+        vx : 0., 
+        vy : 0., 
+        hp : 2, 
+    }); 
+    GameState{tick, player1, player2, ball, obstacles, is_game_over : false}
 }
-    */ 

@@ -20,7 +20,9 @@ impl Ball {
     }
 
     pub fn process_collision_state(&mut self, collision_state : &CollisionState) { 
+        println!("hit before : {:?} {:?}", self, collision_state); 
         self.advance(collision_state.hit_time.unwrap()); 
+        println!("first hit : {:?}", self); 
         match collision_state.hit_dir {
             Dir::LR => {
                 self.vx = - self.vx 
@@ -29,7 +31,8 @@ impl Ball {
                 self.vy = - self.vy; 
             }, 
         }
-        self.advance(0.0000001);  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        self.advance(0.00001);  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        println!("second advance {:?}", self); 
     }
 
 }

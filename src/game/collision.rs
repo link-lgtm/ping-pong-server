@@ -87,5 +87,6 @@ pub fn get_rec_collision_time(ball: &Ball, block: &Rec, time_limit:f32) -> Colli
     } else {
         Dir::UD
     };
+    
     CollisionState{hit_dir:dir_, hit_time:Some(col_t)}
 }
