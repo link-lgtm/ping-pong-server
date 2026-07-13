@@ -51,7 +51,7 @@ pub fn draw_rec(rec:&Rec, rec_color:Color, tex:Option<Texture2D>) {
     draw_mesh(&wtf); 
 }
 
-pub async fn draw_game(game_state:&GameState, obstacle_tex:Option<Texture2D>, ball_tex:Option<Texture2D>, player_tex:Option<Texture2D>) {
+pub fn draw_game(game_state:&GameState, obstacle_tex:Option<Texture2D>, ball_tex:Option<Texture2D>, player_tex:Option<Texture2D>) {
     if game_state.is_game_over {
         clear_background(GRAY); 
         let text = format!("Game is over. Press [Enter] to play again."); 

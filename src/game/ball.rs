@@ -1,6 +1,8 @@
+use serde::{Deserialize, Serialize};
+
 use super::collision::{CollisionState,Dir}; 
 
-#[derive(Debug,Default)]
+#[derive(Debug,Default,Serialize,Deserialize)]
 pub struct Ball {
     pub x: f32, 
     pub y: f32, 

@@ -7,7 +7,9 @@ client 와 server 가 통신할 프로토콜을 정의한다.
 
 use super::game::ball::Ball; 
 use super::game::rec::*; 
+use serde::{Deserialize, Serialize};
 
+#[derive(Serialize, Deserialize, Default)]
 pub struct GameState {
     pub tick: i32, 
     pub player1: Player, 
@@ -17,11 +19,14 @@ pub struct GameState {
     pub is_game_over: bool,
 }
 
+#[derive(Serialize, Deserialize)]
 pub enum Button {
     Up, 
     Down,
     None, 
 }
+
+#[derive(Serialize, Deserialize)]
 pub struct GameInput {
     pub id: i32, 
     pub sequence_number: i32, 

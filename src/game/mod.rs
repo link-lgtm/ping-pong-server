@@ -14,7 +14,7 @@ fn swappy(idx: &mut i32, i: usize, col_state : CollisionState, state : &mut Coll
 }
 
 pub fn update(game_state : &mut GameState, p1_game_input: &GameInput, p2_game_input: &GameInput, dt: f32) {
-    assert!(!game_state.is_game_over); 
+    // assert!(!game_state.is_game_over); 
     let mut time_limit = dt; 
     let ball = &mut game_state.ball; 
     let map_blocks = &mut game_state.obstacles; 
