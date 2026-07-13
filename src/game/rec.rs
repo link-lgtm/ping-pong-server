@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::protocol::{Button}; 
 
-#[derive(Debug, Default,Serialize,Deserialize)]
+#[derive(Debug, Default,Serialize,Deserialize,Clone)]
 pub struct Rec {
     pub x: f32, 
     pub y: f32,
@@ -10,7 +10,7 @@ pub struct Rec {
     pub h: f32, 
 }
 
-#[derive(Debug, Default,Serialize,Deserialize)]
+#[derive(Debug, Default,Serialize,Deserialize,Clone)]
 pub struct Obstacle {
     pub rec: Rec, 
     pub vx : f32, 
@@ -18,7 +18,7 @@ pub struct Obstacle {
     pub hp : i32, 
 }
 
-#[derive(Debug, Default,Serialize,Deserialize)]
+#[derive(Debug, Default,Serialize,Deserialize,Clone)]
 pub struct Player {
     pub rec: Rec, 
     pub score: i32, 

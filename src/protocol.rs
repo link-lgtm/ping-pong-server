@@ -9,7 +9,7 @@ use super::game::ball::Ball;
 use super::game::rec::*; 
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Default)]
+#[derive(Serialize, Deserialize, Default, Clone)]
 pub struct GameState {
     pub tick: i32, 
     pub player1: Player, 
@@ -19,14 +19,14 @@ pub struct GameState {
     pub is_game_over: bool,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Default)]
 pub enum Button {
     Up, 
     Down,
-    None, 
+    #[default] None, 
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Default)]
 pub struct GameInput {
     pub id: i32, 
     pub sequence_number: i32, 

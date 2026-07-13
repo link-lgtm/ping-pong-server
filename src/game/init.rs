@@ -33,8 +33,8 @@ pub fn game_create() -> GameState {
         x : SCREEN_WIDTH / 2., 
         y : SCREEN_HEIGHT / 2.,
         r : 18., 
-        vx : 400., 
-        vy : 400. 
+        vx : 40., 
+        vy : 40. 
     }; 
     let mut obstacles : Vec::<Obstacle> = Vec::new(); 
     obstacles.push(Obstacle{

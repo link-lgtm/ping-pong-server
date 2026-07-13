@@ -19,22 +19,20 @@ fn window_conf() -> Conf {
 }
 
 fn push(mut tcpstream : TcpStream, rx : mpsc::Receiver<GameInput>) {
-    loop {
-        while let Ok(x) = rx.recv() {
-            let v = serde_json::to_vec(&x).unwrap();
-            tcpstream.write_all(& u32::to_le_bytes(v.len() as u32)).unwrap(); 
-            tcpstream.write_all(& v).unwrap(); 
-        }
+    while let Ok(x) = rx.recv() {
+        let v = serde_json::to_vec(&x).unwrap();
+        tcpstream.write_all(& u32::to_le_bytes(v.len() as u32)).unwrap(); 
+        tcpstream.write_all(& v).unwrap(); 
     }
 }
 
 fn pull(mut tcpstream : TcpStream, tx : mpsc::Sender<GameState>) {
     loop {
         let mut buf = [0 as u8; 4]; 
-        while tcpstream.read(&mut buf).is_err() {} 
+        tcpstream.read_exact(&mut buf).unwrap(); 
         let sz = u32::from_le_bytes(buf); 
         let mut buf = vec![0 as u8; sz as usize]; 
-        while tcpstream.read_exact(&mut buf).is_err() {}; 
+        tcpstream.read_exact(&mut buf).unwrap(); 
         let game_state : GameState = serde_json::from_slice(&mut buf).unwrap(); 
         tx.send(game_state).unwrap(); 
     }

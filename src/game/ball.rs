@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use super::collision::{CollisionState,Dir}; 
 
-#[derive(Debug,Default,Serialize,Deserialize)]
+#[derive(Debug,Default,Serialize,Deserialize,Clone)]
 pub struct Ball {
     pub x: f32, 
     pub y: f32, 
@@ -22,9 +22,9 @@ impl Ball {
     }
 
     pub fn process_collision_state(&mut self, collision_state : &CollisionState) { 
-        println!("hit before : {:?} {:?}", self, collision_state); 
+        //println!("hit before : {:?} {:?}", self, collision_state); 
         self.advance(collision_state.hit_time.unwrap()); 
-        println!("first hit : {:?}", self); 
+        //println!("first hit : {:?}", self); 
         match collision_state.hit_dir {
             Dir::LR => {
                 self.vx = - self.vx 
@@ -34,7 +34,7 @@ impl Ball {
             }, 
         }
         self.advance(0.00001);  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        println!("second advance {:?}", self); 
+        //println!("second advance {:?}", self); 
     }
 
 }
